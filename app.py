@@ -224,17 +224,12 @@ with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
                 st.error("Analyse-Datei fehlerhaft.")
 
 # --- HAUPTSEITE ---
-# --- HAUPTSEITE ---
 st.subheader("📜 Phonetisch ausbalancierter Trainingssatz:")
 
-# Wir nutzen st.text_area oder st.code, um jegliche Markdown-Fehler zu blockieren!
-st.code(
-    "Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre\n"
-    "Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...",
-    language="text"
-)
-col1, col2 = st.columns([1, 2])
+# Eine einzige, lange Zeile ohne jegliche Umbrüche im Code – das kann nicht abbrechen!
+st.code("Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...", language="text")
 
+col1, col2 = st.columns([1, 2])
 with col1:
     st.write("### 🎤 Deine Live-Aufnahme")
     live_audio_file = st.audio_input("Klicke zum Aufnehmen")
