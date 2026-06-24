@@ -226,8 +226,15 @@ with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
 # --- HAUPTSEITE ---
 st.subheader("📜 Phonetisch ausbalancierter Trainingssatz:")
 
-# Wir nutzen die sicherste Textausgabe, die es in Streamlit gibt
-st.success("Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...")
+# Die dreifachen Anführungszeichen erlauben unendlichen Text über mehrere Zeilen ohne Crash!
+st.success("""
+"Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre 
+Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte, spürte sie, 
+wie zwölf schwierige Aufgaben, die ihre Geduld und ihren Mut auf eine harte Probe stellten, 
+langsam an Bedeutung verloren, sodass sie ruhig durchatmete, Schritt für Schritt weiterging 
+und schließlich, ohne ihre Ziele aus den Augen zu verlieren, eine kluge Lösung für jedes 
+einzelne Problem fand, die sie und ihre Freunde Monate später noch immer voller Stolz erzählten."
+""")
 
 st.write("### 🎤 Deine Live-Aufnahme")
 live_audio_file = st.audio_input("Klicke zum Aufnehmen und Testen")
