@@ -47,7 +47,7 @@ def speichere_idol_in_db(name, file_path, preview_path, features):
         cursor.execute('''
             INSERT OR REPLACE INTO idole_v2 
             (name, file_path, preview_path, pitch_median, pitch_std, f2_global, f2_bins, jitter, shimmer, hnr)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             name, file_path, preview_path,
             features["pitch_median"], features["pitch_std"], features["f2_global"],
