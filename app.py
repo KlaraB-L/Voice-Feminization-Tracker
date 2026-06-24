@@ -160,7 +160,7 @@ init_db()
 st.set_page_config(page_title="Stimm-RPG v2 Cloud", layout="wide")
 st.title("🎙️ Stimm-RPG v2: Logopädisches Web-Training")
 
-# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (Jetzt mit FLAC-Previews)
+# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (Mit FLAC-Previews)
 IDOL_PAARE = [
     {"id": "84", "name": "Idol 84 (Durchschnitt)", "analysis": "chain_84.wav", "preview": "84_preview.flac"},
     {"id": "1462", "name": "Idol 1462 (Durchschnitt)", "analysis": "chain_1462.wav", "preview": "1462_preview.flac"}
@@ -177,6 +177,7 @@ for idol in IDOL_PAARE:
                     p_path = idol["preview"] if os.path.exists(idol["preview"]) else None
                     speichere_idol_in_db(idol["name"], idol["analysis"], p_path, features)
             st.rerun()
+
 # --- SIDEBAR ---
 st.sidebar.header("📁 Referenz-Datenbank")
 alle_idole = lade_alle_idole()
@@ -185,24 +186,24 @@ if alle_idole:
     ausgewaehltes_idol_name = st.sidebar.selectbox("Wähle dein Trainings-Idol:", list(alle_idole.keys()))
     idol_daten = alle_idole[ausgewaehltes_idol_name]
     
-    # Hörprobe abspielen
+    # HIER IST DER BLOCK, DEN DU GESUCHT HAST (Jetzt optimiert für FLAC und WAV):
     st.sidebar.write("🎧 **Hörprobe / Vorkost (Einzelspur):**")
     if idol_daten.get("preview_path") and os.path.exists(idol_daten["preview_path"]):
-        st.sidebar.audio(idol_daten["preview_path"], format="audio/wav")
+        st.sidebar.audio(idol_daten["preview_path"]) 
     elif os.path.exists(idol_daten["file_path"]):
-        st.sidebar.audio(idol_daten["file_path"], format="audio/wav")
-        st.sidebar.caption("Hinweis: Keine separate Vorschau-Datei gefunden, spiele Analyse-Datei.")
+        st.sidebar.audio(idol_daten["file_path"])
+        st.sidebar.caption("Hinweis: Spiele die Analyse-Datei ab.")
     else:
         st.sidebar.warning("Keine Audiodatei für die Hörprobe gefunden.")
 else:
     st.sidebar.info("Noch kein Idol vorhanden. Bitte lade eins hoch!")
     idol_daten = None
 
-# Neues Idol mit getrennter Analyse & Hörprobe hochladen
+# Neues Idol mit getrennter Analyse & Hörprobe manuell hochladen
 with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
     neu_name = st.text_input("Name des neuen Idols")
-    neu_analysis_file = st.file_uploader("1. Analyse-Datei (60 Spuren nacheinander!)", type=["wav"])
-    neu_preview_file = st.file_uploader("2. Optionale Hörprobe (Einzelspur-Vorschau)", type=["wav"])
+    neu_analysis_file = st.file_uploader("1. Analyse-Datei (WAV)", type=["wav"])
+    neu_preview_file = st.file_uploader("2. Hörprobe (FLAC oder WAV)", type=["flac", "wav"])
     
     if st.button("Beide Analysieren & Speichern") and neu_name and neu_analysis_file:
         a_pfad = os.path.join(UPLOAD_DIR, f"{neu_name}_analysis.wav")
@@ -210,17 +211,18 @@ with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
         
         p_pfad = None
         if neu_preview_file:
-            p_pfad = os.path.join(UPLOAD_DIR, f"{neu_name}_preview.wav")
+            ext = "flac" if "flac" in neu_preview_file.name.lower() else "wav"
+            p_pfad = os.path.join(UPLOAD_DIR, f"{neu_name}_preview.{ext}")
             with open(p_pfad, "wb") as f: f.write(neu_preview_file.getbuffer())
             
         with st.spinner("Analysiere mathematische Merkmale..."):
             features = analysiere_stimme(parselmouth.Sound(a_pfad))
             if features["valid"]:
                 speichere_idol_in_db(neu_name, a_pfad, p_pfad, features)
-                st.success(f"'{neu_name}' erfolgreich in der Cloud-Datenbank gespeichert!")
+                st.success(f"'{neu_name}' erfolgreich gespeichert!")
                 st.rerun()
             else:
-                st.error("Analyse-Datei fehlerhaft. Keine Stimme erkannt.")
+                st.error("Analyse-Datei fehlerhaft.")
 
 # --- HAUPTSEITE ---
 st.subheader("📜 Phonetisch ausbalancierter Trainingssatz:")
@@ -285,4 +287,4 @@ if live_audio_file and idol_daten:
                 plt.tight_layout()
                 st.pyplot(fig)
         else:
-            st.error("Stimme zu leise oder unklar – bitte lauter sprechen!")
+            st.error("Stimme unklar – bitte lauter sprechen!")
