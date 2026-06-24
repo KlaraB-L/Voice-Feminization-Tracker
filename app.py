@@ -253,8 +253,11 @@ if live_audio_file and idol_daten:
             st.progress(gesamt / 100)
             
             # Diagramm-Erstellung
+            # --- Diagramm-Erstellung (Gefixt gegen Weiß-auf-Weiß Fehler) ---
             fig, axs = plt.subplots(4, 1, figsize=(6, 10))
-            plt.style.use('dark_background')
+            
+            # Erzwinge eine feste, dunkle Hintergrundfarbe für das gesamte Bild
+            fig.patch.set_facecolor('#1e1e1e')
             
             i_pitch = float(idol_daten["pitch_median"])
             i_std = float(idol_daten["pitch_std"])
@@ -262,38 +265,51 @@ if live_audio_file and idol_daten:
             i_shimmer = float(idol_daten["shimmer"])
             i_hnr = float(idol_daten["hnr"])
             
+            # Farbdefinitionen für maximale Sichtbarkeit
+            IDOL_COLOR = '#b0b0b0'  # Deutlich sichtbares Hellgrau/Silber statt reinem Weiß
+            DU_PITCH = '#3498db'    # Blau
+            DU_RESO = '#9b59b6'     # Lila
+            DU_MELO = '#e67e22'     # Orange
+            DU_QUALI = '#2ecc71'    # Grün
+            
+            for ax in axs:
+                ax.set_facecolor('#121212') # Dunkler Box-Hintergrund
+                ax.tick_params(colors='white') # Weiße Achsenbeschriftung
+                ax.xaxis.label.set_color('white')
+                ax.yaxis.label.set_color('white')
+            
             # 1. Pitch
-            axs[0].barh(['Deine Tonhöhe'], [live_features["pitch_median"]], color='#3498db', height=0.4)
-            axs[0].axvline(i_pitch, color='white', linestyle='--', label=f'Idol ({i_pitch:.0f} Hz)')
+            axs[0].barh(['Deine Tonhöhe'], [live_features["pitch_median"]], color=DU_PITCH, height=0.4)
+            axs[0].axvline(i_pitch, color=IDOL_COLOR, linestyle='--', linewidth=2, label=f'Idol ({i_pitch:.0f} Hz)')
             axs[0].set_xlim(0, 300)
-            axs[0].legend(loc='upper right', fontsize=8)
+            axs[0].legend(loc='upper right', fontsize=8, facecolor='#1e1e1e', labelcolor='white')
             
             # 2. Resonanz
             g_bins = [b for b in idol_daten["f2_bins"] if b in live_features["f2_bins"]]
             if g_bins:
                 y_pos = np.arange(len(g_bins))
-                axs[1].barh(y_pos - 0.2, [float(idol_daten["f2_bins"][b]["f2_mean"]) for b in g_bins], height=0.35, color='white', alpha=0.4, label='Idol')
-                axs[1].barh(y_pos + 0.2, [live_features["f2_bins"][b]["f2_mean"] for b in g_bins], height=0.35, color='#9b59b6', label='Du')
+                axs[1].barh(y_pos - 0.2, [float(idol_daten["f2_bins"][b]["f2_mean"]) for b in g_bins], height=0.35, color=IDOL_COLOR, alpha=0.6, label='Idol')
+                axs[1].barh(y_pos + 0.2, [live_features["f2_bins"][b]["f2_mean"] for b in g_bins], height=0.35, color=DU_RESO, label='Du')
                 axs[1].set_yticks(y_pos)
                 axs[1].set_yticklabels([b.capitalize() for b in g_bins])
             axs[1].set_xlim(0, 2800)
-            axs[1].legend(loc='upper right', fontsize=8)
+            axs[1].legend(loc='upper right', fontsize=8, facecolor='#1e1e1e', labelcolor='white')
             
             # 3. Melodie
-            axs[2].barh(['Stimm-Melodie'], [live_features["pitch_std"]], color='#e67e22', height=0.4)
-            axs[2].axvline(i_std, color='white', linestyle='--', label=f'Idol ({i_std:.1f} Hz)')
+            axs[2].barh(['Stimm-Melodie'], [live_features["pitch_std"]], color=DU_MELO, height=0.4)
+            axs[2].axvline(i_std, color=IDOL_COLOR, linestyle='--', linewidth=2, label=f'Idol ({i_std:.1f} Hz)')
             axs[2].set_xlim(0, 80)
-            axs[2].legend(loc='upper right', fontsize=8)
+            axs[2].legend(loc='upper right', fontsize=8, facecolor='#1e1e1e', labelcolor='white')
             
             # 4. Qualität
             sq_labels = ['Jitter (%)', 'Shimmer (%)', 'HNR (dB)']
             y_pos_sq = np.arange(len(sq_labels))
-            axs[3].barh(y_pos_sq - 0.2, [i_jitter, i_shimmer, i_hnr], height=0.35, color='white', alpha=0.4, label='Idol')
-            axs[3].barh(y_pos_sq + 0.2, [live_features["jitter"], live_features["shimmer"], live_features["hnr"]], height=0.35, color='#2ecc71', label='Du')
+            axs[3].barh(y_pos_sq - 0.2, [i_jitter, i_shimmer, i_hnr], height=0.35, color=IDOL_COLOR, alpha=0.6, label='Idol')
+            axs[3].barh(y_pos_sq + 0.2, [live_features["jitter"], live_features["shimmer"], live_features["hnr"]], height=0.35, color=DU_QUALI, label='Du')
             axs[3].set_yticks(y_pos_sq)
             axs[3].set_yticklabels(sq_labels)
             axs[3].set_xlim(0, max(35, live_features["hnr"]+5, i_hnr+5))
-            axs[3].legend(loc='upper right', fontsize=8)
+            axs[3].legend(loc='upper right', fontsize=8, facecolor='#1e1e1e', labelcolor='white')
             
             plt.tight_layout()
             st.pyplot(fig)
