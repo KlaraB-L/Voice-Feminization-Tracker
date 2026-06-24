@@ -225,7 +225,8 @@ with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
 
 # --- HAUPTSEITE ---
 st.subheader("📜 Phonetisch ausbalancierter Trainingssatz:")
-st.info('“Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...”')
+# Gefixt: Normale Anführungszeichen, damit Streamlit den Satz nicht abschneidet
+st.info("Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...")
 
 col1, col2 = st.columns([1, 2])
 
@@ -249,37 +250,44 @@ if live_audio_file and idol_daten:
                 fig, axs = plt.subplots(4, 1, figsize=(6, 9))
                 plt.style.use('dark_background')
                 
-                # Pitch
+                # Sichert, dass die Idol-Werte für Matplotlib echte Zahlen (Floats) sind:
+                i_pitch = float(idol_daten["pitch_median"])
+                i_std = float(idol_daten["pitch_std"])
+                i_jitter = float(idol_daten["jitter"])
+                i_shimmer = float(idol_daten["shimmer"])
+                i_hnr = float(idol_daten["hnr"])
+                
+                # Subplot 1: Pitch
                 axs[0].barh(['Deine Tonhöhe'], [live_features["pitch_median"]], color='#3498db', height=0.4)
-                axs[0].axvline(idol_daten["pitch_median"], color='white', linestyle='--', label=f'Idol ({idol_daten["pitch_median"]:.0f} Hz)')
+                axs[0].axvline(i_pitch, color='white', linestyle='--', label=f'Idol ({i_pitch:.0f} Hz)')
                 axs[0].set_xlim(0, 300)
                 axs[0].legend(loc='upper right', fontsize=8)
                 
-                # Resonanz
+                # Subplot 2: Resonanz
                 g_bins = [b for b in idol_daten["f2_bins"] if b in live_features["f2_bins"]]
                 if g_bins:
                     y_pos = np.arange(len(g_bins))
-                    axs[1].barh(y_pos - 0.2, [idol_daten["f2_bins"][b]["f2_mean"] for b in g_bins], height=0.35, color='white', alpha=0.4, label='Idol')
+                    axs[1].barh(y_pos - 0.2, [float(idol_daten["f2_bins"][b]["f2_mean"]) for b in g_bins], height=0.35, color='white', alpha=0.4, label='Idol')
                     axs[1].barh(y_pos + 0.2, [live_features["f2_bins"][b]["f2_mean"] for b in g_bins], height=0.35, color='#9b59b6', label='Du')
                     axs[1].set_yticks(y_pos)
                     axs[1].set_yticklabels([b.capitalize() for b in g_bins])
                 axs[1].set_xlim(0, 2800)
                 axs[1].legend(loc='upper right', fontsize=8)
                 
-                # Melodie
+                # Subplot 3: Melodie
                 axs[2].barh(['Stimm-Melodie'], [live_features["pitch_std"]], color='#e67e22', height=0.4)
-                axs[2].axvline(idol_daten["pitch_std"], color='white', linestyle='--', label=f'Idol ({idol_daten["pitch_std"]:.1f} Hz)')
+                axs[2].axvline(i_std, color='white', linestyle='--', label=f'Idol ({i_std:.1f} Hz)')
                 axs[2].set_xlim(0, 80)
                 axs[2].legend(loc='upper right', fontsize=8)
                 
-                # Qualität
+                # Subplot 4: Qualität
                 sq_labels = ['Jitter (%)', 'Shimmer (%)', 'HNR (dB)']
                 y_pos_sq = np.arange(len(sq_labels))
-                axs[3].barh(y_pos_sq - 0.2, [idol_daten["jitter"], idol_daten["shimmer"], idol_daten["hnr"]], height=0.35, color='white', alpha=0.4, label='Idol')
+                axs[3].barh(y_pos_sq - 0.2, [i_jitter, i_shimmer, i_hnr], height=0.35, color='white', alpha=0.4, label='Idol')
                 axs[3].barh(y_pos_sq + 0.2, [live_features["jitter"], live_features["shimmer"], live_features["hnr"]], height=0.35, color='#2ecc71', label='Du')
                 axs[3].set_yticks(y_pos_sq)
                 axs[3].set_yticklabels(sq_labels)
-                axs[3].set_xlim(0, max(35, live_features["hnr"]+5, idol_daten["hnr"]+5))
+                axs[3].set_xlim(0, max(35, live_features["hnr"]+5, i_hnr+5))
                 axs[3].legend(loc='upper right', fontsize=8)
                 
                 plt.tight_layout()
