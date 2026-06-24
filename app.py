@@ -160,25 +160,23 @@ init_db()
 st.set_page_config(page_title="Stimm-RPG v2 Cloud", layout="wide")
 st.title("🎙️ Stimm-RPG v2: Logopädisches Web-Training")
 
-# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (84 & 1462)
+# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (Jetzt mit FLAC-Previews)
 IDOL_PAARE = [
-    {"id": "84", "name": "Idol 84 (Durchschnitt)", "analysis": "chain_84.wav", "preview": "84_preview.wav"},
-    {"id": "1462", "name": "Idol 1462 (Durchschnitt)", "analysis": "chain_1462.wav", "preview": "1462_preview.wav"}
+    {"id": "84", "name": "Idol 84 (Durchschnitt)", "analysis": "chain_84.wav", "preview": "84_preview.flac"},
+    {"id": "1462", "name": "Idol 1462 (Durchschnitt)", "analysis": "chain_1462.wav", "preview": "1462_preview.flac"}
 ]
 
 aktuelle_idole = lade_alle_idole()
 
 for idol in IDOL_PAARE:
     if idol["name"] not in aktuelle_idole:
-        # Prüfen, ob die Analyse-Datei existiert
         if os.path.exists(idol["analysis"]):
             with st.spinner(f"Importiere {idol['name']}... Bitte kurz warten."):
                 features = analysiere_stimme(parselmouth.Sound(idol["analysis"]))
                 if features["valid"]:
-                    # Prüfen, ob eine Preview-Datei existiert
                     p_path = idol["preview"] if os.path.exists(idol["preview"]) else None
                     speichere_idol_in_db(idol["name"], idol["analysis"], p_path, features)
-            st.rerun()  # App neu laden, damit das neue Idol im Menü erscheint
+            st.rerun()
 # --- SIDEBAR ---
 st.sidebar.header("📁 Referenz-Datenbank")
 alle_idole = lade_alle_idole()
