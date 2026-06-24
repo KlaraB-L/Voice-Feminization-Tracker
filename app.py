@@ -9,8 +9,7 @@ import matplotlib.pyplot as plt
 
 # --- KONFIGURATION ---
 DB_FILE = "stimm_rpg.db"
-UPLOAD_DIR = "idole"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+UPLOAD_DIR = "."  # Der Punkt bedeutet: Nutze einfach den Hauptordner!
 
 PITCH_FLOOR = 75.0
 PITCH_CEILING = 500.0
