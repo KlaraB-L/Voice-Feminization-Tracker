@@ -23,7 +23,7 @@ def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS idole (
+        CREATE TABLE IF NOT EXISTS idole_v2 (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE,
             file_path TEXT,
@@ -45,7 +45,7 @@ def speichere_idol_in_db(name, file_path, preview_path, features):
     cursor = conn.cursor()
     try:
         cursor.execute('''
-            INSERT OR REPLACE INTO idole 
+            INSERT OR REPLACE INTO idole_v2 
             (name, file_path, preview_path, pitch_median, pitch_std, f2_global, f2_bins, jitter, shimmer, hnr)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
@@ -62,7 +62,7 @@ def speichere_idol_in_db(name, file_path, preview_path, features):
 def lade_alle_idole():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('SELECT name, file_path, preview_path, pitch_median, pitch_std, f2_global, f2_bins, jitter, shimmer, hnr FROM idole')
+    cursor.execute('SELECT name, file_path, preview_path, pitch_median, pitch_std, f2_global, f2_bins, jitter, shimmer, hnr FROM idole_v2')
     rows = cursor.fetchall()
     conn.close()
     
@@ -155,12 +155,12 @@ def berechne_scores(live, idol):
     gesamt = int((p_score * 0.30) + (r_score * 0.35) + (pros_score * 0.15) + (sq_score * 0.20))
     return gesamt, p_score, r_score, pros_score, sq_score
 
-# --- APP SETUP ---
+# --- APP SETUP & INITIALISIERUNG ---
 init_db()
 st.set_page_config(page_title="Stimm-RPG v2 Cloud", layout="wide")
 st.title("🎙️ Stimm-RPG v2: Logopädisches Web-Training")
 
-# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (Mit FLAC-Previews)
+# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN
 IDOL_PAARE = [
     {"id": "84", "name": "Idol 84 (Durchschnitt)", "analysis": "chain_84.wav", "preview": "84_preview.flac"},
     {"id": "1462", "name": "Idol 1462 (Durchschnitt)", "analysis": "chain_1462.wav", "preview": "1462_preview.flac"}
@@ -176,7 +176,7 @@ for idol in IDOL_PAARE:
                 if features["valid"]:
                     p_path = idol["preview"] if os.path.exists(idol["preview"]) else None
                     speichere_idol_in_db(idol["name"], idol["analysis"], p_path, features)
-            st.rerun()
+                    st.rerun()
 
 # --- SIDEBAR ---
 st.sidebar.header("📁 Referenz-Datenbank")
@@ -186,7 +186,6 @@ if alle_idole:
     ausgewaehltes_idol_name = st.sidebar.selectbox("Wähle dein Trainings-Idol:", list(alle_idole.keys()))
     idol_daten = alle_idole[ausgewaehltes_idol_name]
     
-    # HIER IST DER BLOCK, DEN DU GESUCHT HAST (Jetzt optimiert für FLAC und WAV):
     st.sidebar.write("🎧 **Hörprobe / Vorkost (Einzelspur):**")
     if idol_daten.get("preview_path") and os.path.exists(idol_daten["preview_path"]):
         st.sidebar.audio(idol_daten["preview_path"]) 
@@ -199,7 +198,7 @@ else:
     st.sidebar.info("Noch kein Idol vorhanden. Bitte lade eins hoch!")
     idol_daten = None
 
-# Neues Idol mit getrennter Analyse & Hörprobe manuell hochladen
+# Manuelles Upload-Menü
 with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
     neu_name = st.text_input("Name des neuen Idols")
     neu_analysis_file = st.file_uploader("1. Analyse-Datei (WAV)", type=["wav"])
@@ -247,7 +246,6 @@ if live_audio_file and idol_daten:
                 st.write(f"### 🏆 Übereinstimmung mit '{ausgewaehltes_idol_name}': {gesamt}%")
                 st.progress(gesamt / 100)
                 
-                # Feedback-Grafik
                 fig, axs = plt.subplots(4, 1, figsize=(6, 9))
                 plt.style.use('dark_background')
                 
