@@ -224,10 +224,15 @@ with st.sidebar.expander("➕ Neues Referenz-Idol hochladen"):
                 st.error("Analyse-Datei fehlerhaft.")
 
 # --- HAUPTSEITE ---
+# --- HAUPTSEITE ---
 st.subheader("📜 Phonetisch ausbalancierter Trainingssatz:")
-# Gefixt: Normale Anführungszeichen, damit Streamlit den Satz nicht abschneidet
-st.info("Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...")
 
+# Wir nutzen st.text_area oder st.code, um jegliche Markdown-Fehler zu blockieren!
+st.code(
+    "Während Yvonne früh am Ufer über glühende Kohlen schritt und dabei laut über ihre\n"
+    "Lieblingsbücher, große Öko-Häuser und ungewöhnliche Pflanzenarten nachdachte...",
+    language="text"
+)
 col1, col2 = st.columns([1, 2])
 
 with col1:
