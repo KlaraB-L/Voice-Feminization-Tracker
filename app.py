@@ -155,23 +155,30 @@ def berechne_scores(live, idol):
     gesamt = int((p_score * 0.30) + (r_score * 0.35) + (pros_score * 0.15) + (sq_score * 0.20))
     return gesamt, p_score, r_score, pros_score, sq_score
 
-# --- APP RUN ---
+# --- APP SETUP ---
 init_db()
 st.set_page_config(page_title="Stimm-RPG v2 Cloud", layout="wide")
 st.title("🎙️ Stimm-RPG v2: Logopädisches Web-Training")
 
-# AUTOMATISCHER AUTO-IMPORT BEIM ERSTEN START IN DER CLOUD
-DEFAULT_ANALYSIS = "combined_84.wav"
-DEFAULT_PREVIEW = "combined_84_preview.wav"
-if os.path.exists(DEFAULT_ANALYSIS):
-    aktuelle_idole = lade_alle_idole()
-    if "Standard Idol (84)" not in aktuelle_idole:
-        features = analysiere_stimme(parselmouth.Sound(DEFAULT_ANALYSIS))
-        if features["valid"]:
-            # Falls die Preview existiert, Pfad speichern, ansonsten None
-            p_path = DEFAULT_PREVIEW if os.path.exists(DEFAULT_PREVIEW) else None
-            speichere_idol_in_db("Standard Idol (84)", DEFAULT_ANALYSIS, p_path, features)
+# AUTOMATISCHER IMPORT FÜR DEINE SPEZIFISCHEN DATEIEN (84 & 1462)
+IDOL_PAARE = [
+    {"id": "84", "name": "Idol 84 (Durchschnitt)", "analysis": "chain_84.wav", "preview": "84_preview.wav"},
+    {"id": "1462", "name": "Idol 1462 (Durchschnitt)", "analysis": "chain_1462.wav", "preview": "1462_preview.wav"}
+]
 
+aktuelle_idole = lade_alle_idole()
+
+for idol in IDOL_PAARE:
+    if idol["name"] not in aktuelle_idole:
+        # Prüfen, ob die Analyse-Datei existiert
+        if os.path.exists(idol["analysis"]):
+            with st.spinner(f"Importiere {idol['name']}... Bitte kurz warten."):
+                features = analysiere_stimme(parselmouth.Sound(idol["analysis"]))
+                if features["valid"]:
+                    # Prüfen, ob eine Preview-Datei existiert
+                    p_path = idol["preview"] if os.path.exists(idol["preview"]) else None
+                    speichere_idol_in_db(idol["name"], idol["analysis"], p_path, features)
+            st.rerun()  # App neu laden, damit das neue Idol im Menü erscheint
 # --- SIDEBAR ---
 st.sidebar.header("📁 Referenz-Datenbank")
 alle_idole = lade_alle_idole()
